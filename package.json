@@ -10,6 +10,7 @@
   "repository": {
     "url": "https://github.com/pablor21/gqlschemagen-vscode"
   },
+  "icon": "./art/logo.png",
   "categories": [
     "Programming Languages",
     "Linters"
@@ -24,7 +25,7 @@
   "activationEvents": [
     "onLanguage:go"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {

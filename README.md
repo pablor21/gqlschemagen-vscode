@@ -1,4 +1,4 @@
-[![Logo](art/logo.svg)](./art/logo.svg)
+[![Logo](art/logo.png)](./art/logo.png)
 
 
 # GQL Schema Gen - VS Code Extension
