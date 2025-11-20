@@ -25,7 +25,7 @@
   "activationEvents": [
     "onLanguage:go"
   ],
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
@@ -59,7 +59,8 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run package",
+    "package": "npm run esbuild-base -- --minify && node -e \"const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.main='./dist/extension.js';fs.writeFileSync('package.json',JSON.stringify(p,null,2))\"",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",

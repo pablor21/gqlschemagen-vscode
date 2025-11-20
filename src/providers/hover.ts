@@ -17,7 +17,10 @@ export class HoverProvider implements vscode.HoverProvider {
 		const tags = this.tagParser.parseTags(text);
 		for (const tag of tags) {
 			if (offset >= tag.range.start && offset <= tag.range.end) {
-				return this.getTagHover(tag);
+				const startPos = document.positionAt(tag.range.start);
+				const endPos = document.positionAt(tag.range.end);
+				const range = new vscode.Range(startPos, endPos);
+				return this.getTagHover(tag, range);
 			}
 		}
 
@@ -25,14 +28,17 @@ export class HoverProvider implements vscode.HoverProvider {
 		const directives = this.directiveParser.parseDirectives(text);
 		for (const directive of directives) {
 			if (offset >= directive.range.start && offset <= directive.range.end) {
-				return this.getDirectiveHover(directive, document);
+				const startPos = document.positionAt(directive.range.start);
+				const endPos = document.positionAt(directive.range.end);
+				const range = new vscode.Range(startPos, endPos);
+				return this.getDirectiveHover(directive, document, range);
 			}
 		}
 
 		return undefined;
 	}
 
-	private getTagHover(tag: any): vscode.Hover {
+	private getTagHover(tag: any, range: vscode.Range): vscode.Hover {
 		const markdown = new vscode.MarkdownString();
 		markdown.appendMarkdown('**GQL Struct Tag**\n\n');
 		markdown.appendCodeblock(tag.rawTag, 'go');
@@ -61,10 +67,10 @@ export class HoverProvider implements vscode.HoverProvider {
 		markdown.appendMarkdown('- `rw`: Read-write (both)\n');
 
 		markdown.isTrusted = true;
-		return new vscode.Hover(markdown);
+		return new vscode.Hover(markdown, range);
 	}
 
-	private getDirectiveHover(directive: any, document: vscode.TextDocument): vscode.Hover {
+	private getDirectiveHover(directive: any, document: vscode.TextDocument, range: vscode.Range): vscode.Hover {
 		const markdown = new vscode.MarkdownString();
 		markdown.appendMarkdown(`**@${directive.type}**\n\n`);
 
@@ -106,7 +112,7 @@ export class HoverProvider implements vscode.HoverProvider {
 		}
 
 		markdown.isTrusted = true;
-		return new vscode.Hover(markdown);
+		return new vscode.Hover(markdown, range);
 	}
 
 	private isTypeGeneratingDirective(directiveType: string): boolean {

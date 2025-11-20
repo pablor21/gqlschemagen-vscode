@@ -1,6 +1,6 @@
 import { GqlTag, GqlDirective } from '../utils/types';
 
-const TAG_REGEX = /`gql:"([^`]+)"`/g;
+const TAG_REGEX = /gql:"([^"]+)"/g;
 const DIRECTIVE_REGEX = /@([Gg]ql\w+)(?:\(([^)]*)\))?/g;
 
 export class TagParser {

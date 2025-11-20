@@ -11,8 +11,14 @@ export class CompletionProvider implements vscode.CompletionItemProvider {
 		const line = document.lineAt(position).text;
 		const linePrefix = line.substring(0, position.character);
 
+		// Check if we're typing a directive (@ at start of line in comment)
+		const directiveMatch = linePrefix.match(/^\s*(\/\/\s*|\/\*+\s*|\*\s*)@(\w*)$/);
+		if (directiveMatch) {
+			return this.getDirectiveCompletions();
+		}
+
 		// Check if we're inside a gql tag
-		const gqlTagMatch = linePrefix.match(/`gql:"([^`]*)/);
+		const gqlTagMatch = linePrefix.match(/gql:"([^"]*)/);
 		if (!gqlTagMatch) {
 			return undefined;
 		}
@@ -94,6 +100,46 @@ export class CompletionProvider implements vscode.CompletionItemProvider {
 			const item = new vscode.CompletionItem(typeName, vscode.CompletionItemKind.Class);
 			completions.push(item);
 		}
+
+		return completions;
+	}
+
+	private getDirectiveCompletions(): vscode.CompletionItem[] {
+		const completions: vscode.CompletionItem[] = [];
+
+		// @GqlType
+		const typeItem = new vscode.CompletionItem('GqlType', vscode.CompletionItemKind.Keyword);
+		typeItem.insertText = new vscode.SnippetString('GqlType${1:(name:"${2:TypeName}")}');
+		typeItem.documentation = new vscode.MarkdownString('Define a GraphQL type. The `name` parameter is optional - if omitted, uses the struct name.');
+		completions.push(typeItem);
+
+		// @GqlInput
+		const inputItem = new vscode.CompletionItem('GqlInput', vscode.CompletionItemKind.Keyword);
+		inputItem.insertText = new vscode.SnippetString('GqlInput${1:(name:"${2:InputName}")}');
+		inputItem.documentation = new vscode.MarkdownString('Define a GraphQL input type. The `name` parameter is optional - if omitted, uses the struct name with "Input" suffix.');
+		completions.push(inputItem);
+
+		// @GqlEnum
+		const enumItem = new vscode.CompletionItem('GqlEnum', vscode.CompletionItemKind.Keyword);
+		enumItem.insertText = new vscode.SnippetString('GqlEnum${1:(name:"${2:EnumName}")}');
+		enumItem.documentation = new vscode.MarkdownString('Define a GraphQL enum. The `name` parameter is optional - if omitted, uses the type name.');
+		completions.push(enumItem);
+
+		// @GqlNamespace
+		const namespaceItem = new vscode.CompletionItem('GqlNamespace', vscode.CompletionItemKind.Keyword);
+		namespaceItem.insertText = new vscode.SnippetString('GqlNamespace(name:"${1:NamespaceName}")');
+		namespaceItem.documentation = new vscode.MarkdownString('Group types under a namespace. The `name` parameter is **required**.');
+		completions.push(namespaceItem);
+
+		// @GqlIgnore
+		const ignoreItem = new vscode.CompletionItem('GqlIgnore', vscode.CompletionItemKind.Keyword);
+		ignoreItem.documentation = new vscode.MarkdownString('Ignore this struct - do not generate GraphQL schema for it.');
+		completions.push(ignoreItem);
+
+		// @GqlIgnoreAll
+		const ignoreAllItem = new vscode.CompletionItem('GqlIgnoreAll', vscode.CompletionItemKind.Keyword);
+		ignoreAllItem.documentation = new vscode.MarkdownString('Ignore all structs in this file.');
+		completions.push(ignoreAllItem);
 
 		return completions;
 	}

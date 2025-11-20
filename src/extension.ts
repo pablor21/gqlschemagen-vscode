@@ -6,6 +6,7 @@ import { CodeActionProvider } from './providers/codeAction';
 
 export function activate(context: vscode.ExtensionContext) {
 	console.log('GQL Schema Gen extension is now active');
+	vscode.window.showInformationMessage('GQL Schema Gen extension activated!');
 
 	const diagnosticsProvider = new DiagnosticsProvider();
 
@@ -35,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.languages.registerCompletionItemProvider(
 			'go',
 			new CompletionProvider(),
-			'"', ',', ':'
+			'"', ',', ':', '@'
 		)
 	);
 

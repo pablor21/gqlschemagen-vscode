@@ -38,11 +38,12 @@ export class DiagnosticsProvider {
 			const structTypes = this.findStructTypesForTag(tag, lines, structTypeMap);
 			
 			// Create a context with only the types available for this struct
-			const tagContext = {
+			// If no struct-specific types found, use the global context
+			const tagContext = (structTypes.types.length > 0 || structTypes.inputs.length > 0) ? {
 				...context,
 				availableTypes: structTypes.types,
 				availableInputs: structTypes.inputs
-			};
+			} : context;
 			
 			const issues = this.validator.validateTag(tag, tagContext);
 			for (const issue of issues) {
