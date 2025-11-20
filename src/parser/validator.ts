@@ -90,20 +90,8 @@ export class TagValidator {
 
 		// Type-specific validation
 		switch (normalizedType) {
-			case 'gqltype':
-			case 'gqlinput':
-			case 'gqlenum':
-				if (!directive.params.name) {
-					issues.push({
-						message: `@${directive.type} directive requires a "name" parameter`,
-						severity: 'error',
-						range: directive.range,
-						position: directive.position
-					});
-				}
-				break;
-
 			case 'gqlnamespace':
+				// Only GqlNamespace requires the name parameter
 				if (!directive.params.name) {
 					issues.push({
 						message: '@GqlNamespace directive requires a "name" parameter',
@@ -112,6 +100,13 @@ export class TagValidator {
 						position: directive.position
 					});
 				}
+				break;
+			
+			// GqlType, GqlInput, GqlEnum have optional name parameter (defaults to struct name)
+			case 'gqltype':
+			case 'gqlinput':
+			case 'gqlenum':
+				// name parameter is optional - if omitted, uses struct name
 				break;
 		}
 

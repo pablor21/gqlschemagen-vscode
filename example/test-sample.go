@@ -2,8 +2,10 @@ package main
 
 import "time"
 
-// @GqlType(name:"User")
-// @GqlInput(name:"UserInput")
+// @GqlType
+// @GqlType(name:"PublicView")
+// @GqlType(name:"AdminView")
+// @GqlInput
 type User struct {
 	// Basic fields
 	ID    string `gql:"id,ro"`

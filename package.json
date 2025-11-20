@@ -25,7 +25,7 @@
   "activationEvents": [
     "onLanguage:go"
   ],
-  "main": "./dist/extension.js",
+  "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {

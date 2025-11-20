@@ -25,7 +25,7 @@ export class HoverProvider implements vscode.HoverProvider {
 		const directives = this.directiveParser.parseDirectives(text);
 		for (const directive of directives) {
 			if (offset >= directive.range.start && offset <= directive.range.end) {
-				return this.getDirectiveHover(directive);
+				return this.getDirectiveHover(directive, document);
 			}
 		}
 
@@ -64,7 +64,7 @@ export class HoverProvider implements vscode.HoverProvider {
 		return new vscode.Hover(markdown);
 	}
 
-	private getDirectiveHover(directive: any): vscode.Hover {
+	private getDirectiveHover(directive: any, document: vscode.TextDocument): vscode.Hover {
 		const markdown = new vscode.MarkdownString();
 		markdown.appendMarkdown(`**@${directive.type}**\n\n`);
 
@@ -85,14 +85,49 @@ export class HoverProvider implements vscode.HoverProvider {
 
 		markdown.appendMarkdown(descriptions[directive.type] || 'GraphQL directive\n\n');
 
-		if (Object.keys(directive.params).length > 0) {
+		// If no explicit name parameter, try to infer it from the struct
+		const params = { ...directive.params };
+		if (!params.name && this.isTypeGeneratingDirective(directive.type)) {
+			const structName = this.findStructNameAfterDirective(directive, document);
+			if (structName) {
+				if (directive.type.toLowerCase() === 'gqlinput') {
+					params.name = structName + 'Input';
+				} else {
+					params.name = structName;
+				}
+			}
+		}
+
+		if (Object.keys(params).length > 0) {
 			markdown.appendMarkdown('\n\n**Parameters:**\n\n');
-			for (const [key, value] of Object.entries(directive.params)) {
+			for (const [key, value] of Object.entries(params)) {
 				markdown.appendMarkdown(`- \`${key}\`: ${value}\n`);
 			}
 		}
 
 		markdown.isTrusted = true;
 		return new vscode.Hover(markdown);
+	}
+
+	private isTypeGeneratingDirective(directiveType: string): boolean {
+		const normalized = directiveType.toLowerCase();
+		return normalized === 'gqltype' || normalized === 'gqlinput' || normalized === 'gqlenum';
+	}
+
+	private findStructNameAfterDirective(directive: any, document: vscode.TextDocument): string | undefined {
+		const text = document.getText();
+		const lines = text.split('\n');
+		const directiveLine = directive.position.line;
+
+		// Look forward from directive to find struct definition
+		for (let i = directiveLine; i < Math.min(lines.length, directiveLine + 10); i++) {
+			const line = lines[i];
+			const structMatch = line.match(/type\s+(\w+)\s+struct/);
+			if (structMatch) {
+				return structMatch[1];
+			}
+		}
+
+		return undefined;
 	}
 }
